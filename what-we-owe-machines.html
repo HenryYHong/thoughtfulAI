@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What We Owe Machines · ThoughtfulAI — CDSS 94</title>
+    <meta name="description" content="Reflections on the hard problem in AI: teaching machines to handle problems without right answers. Week 1 · CDSS 94." />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-bg">
+      <div class="grid-overlay"></div>
+      <div class="scanline"></div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="./">
+          <span class="logo-bracket">[</span>ThoughtfulAI<span class="logo-bracket">]</span>
+          <span class="logo-label">CDSS 94</span>
+        </a>
+        <nav class="nav">
+          <a href="./">Posts</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="wrap">
+        <article class="article-layout">
+          <aside class="toc">
+            <p class="toc-title">On this page</p>
+            <nav>
+              <a href="#the-hard-problem">The hard problem</a>
+              <a href="#teaching-machines">Teaching machines at all</a>
+              <a href="#where-it-stands">Where the project stands</a>
+              <a href="#what-we-owe">What we owe</a>
+            </nav>
+          </aside>
+
+          <div>
+            <a class="back-link" href="./">← All posts</a>
+
+            <header class="article-header">
+              <div class="article-meta">
+                <span class="date">2026-01-26</span>
+                <span class="badge badge-module">Module 1</span>
+                <span class="badge badge-week">Week 1</span>
+              </div>
+              <h1>What We Owe Machines</h1>
+              <p class="article-byline">~4 min read · Fundamentals · What We Owe Machines (Jan 26)</p>
+            </header>
+
+            <div class="article-content">
+              <p>
+                The hard problem in AI isn’t making machines smarter—it’s teaching them to handle problems that don’t have right answers. That line from this week’s lecture stuck with me. We’re used to optimizing for clear objectives: accuracy, reward, “correct” behavior. But a lot of what we want from AI—fairness, nuance, knowing when to say “I don’t know”—lives in the space where there is no single right answer.
+              </p>
+
+              <div class="pullquote">
+                The hard problem in AI isn’t making machines smarter—it’s teaching them to handle problems that don’t have right answers.
+              </div>
+
+              <h2 id="the-hard-problem">The hard problem</h2>
+              <p>
+                Optimization assumes a target. In supervised learning we have labels; in RL we have reward. But many of the behaviors we care about—being helpful without being sycophantic, being honest about uncertainty, avoiding harm across diverse contexts—don’t map cleanly onto a single scalar. The lecture framed this as the central tension: we’re building systems that must act in the world, yet we often can’t fully specify what “good” looks like in advance.
+              </p>
+
+              <div class="callout">
+                <p class="callout-title">Key idea</p>
+                <p>
+                  We don’t just build capability; we choose what counts as success. That choice is where ethics and design meet—and where “what we owe machines” starts to look a lot like “what we owe each other when we build things that act in the world.”
+                </p>
+              </div>
+
+              <h2 id="teaching-machines">Teaching machines at all</h2>
+              <p>
+                The lecture walked through how we even got to the point of “teaching” machines: from early programs that followed rules to systems that learn from data and feedback. What stood out was how much of that history is about us deciding what to optimize for. Rule-based systems encoded human judgment directly; statistical and neural approaches learn from data that itself reflects human choices—what to label, what to reward, what to include or exclude.
+              </p>
+
+              <ul class="key-terms">
+                <li><span class="term">Post-training</span> The phase after pretraining where we shape behavior via reward, feedback, and evaluation.</li>
+                <li><span class="term">Alignment</span> The problem of making model objectives match intended (human) goals and values.</li>
+                <li><span class="term">Reward / objective</span> What we optimize for; often a proxy for what we actually want.</li>
+              </ul>
+
+              <h2 id="where-it-stands">Where the project stands</h2>
+              <p>
+                Right now we’re in a phase where models are powerful but brittle, helpful but sometimes harmful, and often bad at knowing their own limits. Post-training—reward models, alignment, evaluations—is the work of closing that gap. It’s not just technical; it’s about being explicit about what we want, what we’re willing to trade off, and how we hold both the systems and ourselves accountable.
+              </p>
+
+              <p>
+                The lifecycle from pretraining to deployment involves many levers: data, objectives, feedback, red-teaming, monitoring. Each step embeds assumptions about “good” behavior. Making those assumptions visible and contestable is part of the work—and part of what we might owe the people affected by these systems.
+              </p>
+
+              <h2 id="what-we-owe">What we owe</h2>
+              <p>
+                I’m still wrestling with the question of what we actually owe machines. Do we owe them “good” objectives? Transparency about how we shape them? Or is the obligation mostly to the people affected by what those machines do? This week was a good reminder that the answer isn’t in the code alone—it’s in how we frame the problem and who we include in that conversation.
+              </p>
+
+              <p>
+                The lecture didn’t resolve that question, and I don’t think it was meant to. It set the stage: we’re not just building smarter tools; we’re building systems that will make consequential decisions in ambiguous situations. How we train them, what we optimize for, and how we evaluate and deploy them are all sites where “what we owe” gets decided—in practice, if not in theory.
+              </p>
+            </div>
+
+            <footer class="article-footer">
+              <p class="toc-title">Tags</p>
+              <div class="tags">
+                <span class="tag">alignment</span>
+                <span class="tag">ethics</span>
+                <span class="tag">post-training</span>
+                <span class="tag">objectives</span>
+                <span class="tag">Module 1</span>
+              </div>
+            </footer>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span class="footer-mono">CDSS 94 · Spring 2026 · Building Thoughtful AI Systems</span>
+      </div>
+    </footer>
+  </body>
+</html>
