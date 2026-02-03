@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ThoughtfulAI · CDSS 94 — Building Thoughtful AI Systems</title>
     <meta name="description" content="Weekly documentation and reflections on post-training, alignment, and what we owe machines. CDSS 94 · Spring 2026." />
+    <meta name="theme-color" content="#0a0b0f" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a href="#main" class="skip-link">Skip to content</a>
     <div class="page-bg">
       <div class="grid-overlay"></div>
       <div class="scanline"></div>
@@ -20,12 +22,13 @@
           <span class="logo-label">CDSS 94</span>
         </a>
         <nav class="nav">
-          <a href="./">Posts</a>
+          <a href="./#posts">Posts</a>
+          <a href="./#about">About</a>
         </nav>
       </div>
     </header>
 
-    <main>
+    <main id="main">
       <div class="wrap">
         <section class="hero">
           <div class="hero-badge">Live · Spring 2026</div>
@@ -41,7 +44,29 @@
           </div>
         </section>
 
-        <p class="section-label">Documentation &amp; Reflections</p>
+        <section class="about-section" id="about">
+          <p class="section-label">About</p>
+          <div class="bio-card">
+            <div class="bio-avatar" aria-hidden="true">H</div>
+            <div>
+              <h2 class="bio-name">Henry</h2>
+              <p class="bio-role">CDSS 94 · Spring 2026</p>
+              <p class="bio-text">
+                I’m taking Building Thoughtful AI Systems this semester because I want to understand what happens after we train a big model—how we actually shape how it behaves, what “alignment” means in practice, and how people build AI systems that are reliable and useful instead of just powerful.
+              </p>
+              <p class="bio-text">
+                I’m into the technical side (reward models, RLHF, evals) but also the messier questions: who decides what “good” looks like, what we owe the people affected by these systems, and how we make those choices in real products and research. This site is where I’ll post weekly docs and reflections as we go through the course.
+              </p>
+              <div class="bio-meta">
+                <span><span class="dot">◆</span> Student</span>
+                <span><span class="dot">◆</span> Spring 2026</span>
+                <span><span class="dot">◆</span> Post-training · Alignment · RL</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <p class="section-label" id="posts">Documentation &amp; Reflections</p>
         <ul class="post-list">
           <li>
             <a href="what-we-owe-machines.html" class="post-card">
@@ -54,10 +79,10 @@
               </div>
               <h2 class="title">What We Owe Machines</h2>
               <p class="excerpt">
-                The hard problem in AI isn’t making machines smarter—it’s teaching them to handle problems that don’t have right answers. Reflections on how we learned to teach machines at all, and where that project stands today.
+                Why I’m taking CDSS 94, what “the hard problem” actually is, and one question I’m still sitting with: do we owe the machines, or the people affected by them?
               </p>
               <div class="post-card-footer">
-                <span class="read-time">~4 min read</span>
+                <span class="read-time">~8 min read</span>
                 <span>alignment · ethics · post-training</span>
               </div>
             </a>
