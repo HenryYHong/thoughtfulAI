@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Post-Training: Shaping Behavior After Pretraining · ThoughtfulAI — CDSS 94</title>
+    <meta name="description" content="Exploring post-training techniques: how we shape model behavior through RLHF, reward modeling, and alignment. Week 3 · CDSS 94." />
+    <meta name="theme-color" content="#0a0b0f" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <div class="page-bg">
+      <div class="grid-overlay"></div>
+      <div class="scanline"></div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="./">
+          <span class="logo-bracket">[</span>ThoughtfulAI<span class="logo-bracket">]</span>
+          <span class="logo-label">CDSS 94</span>
+        </a>
+        <nav class="nav">
+          <a href="./#posts">Posts</a>
+          <a href="./#about">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <article class="article-layout">
+          <aside class="toc">
+            <p class="toc-title">On this page</p>
+            <nav>
+              <a href="#the-gap">The gap after pretraining</a>
+              <a href="#what-is-post-training">What is post-training?</a>
+              <a href="#reward-modeling">Reward modeling</a>
+              <a href="#rlhf">Reinforcement learning from human feedback</a>
+              <a href="#evaluation">Evaluation and monitoring</a>
+              <a href="#challenges">The challenges</a>
+              <a href="#what-clicked">What clicked for me</a>
+              <a href="#questions">Questions I'm wrestling with</a>
+            </nav>
+          </aside>
+
+          <div>
+            <a class="back-link" href="./">← All posts</a>
+
+            <header class="article-header">
+              <div class="article-meta">
+                <span class="date">2026-02-09</span>
+                <span class="badge badge-module">Module 2</span>
+                <span class="badge badge-week">Week 3</span>
+              </div>
+              <h1>Post-Training: Shaping Behavior After Pretraining</h1>
+              <p class="article-byline">~10 min read · Post-Training · Week 3</p>
+            </header>
+
+            <div class="article-content">
+              <h2 id="the-gap">The gap after pretraining</h2>
+              <p>
+                Pretraining gives us a model that can predict the next token. It learns patterns, syntax, facts, and some reasoning. But it doesn't learn to be helpful, harmless, or honest. It doesn't learn to follow instructions or align with human preferences. That gap—between "can generate text" and "does what we want"—is where post-training lives.
+              </p>
+
+              <p>
+                This week we dove into the techniques that bridge that gap: reward modeling, reinforcement learning from human feedback (RLHF), supervised fine-tuning, and evaluation frameworks. What struck me is how much of this work is about translating fuzzy human preferences into something we can optimize for.
+              </p>
+
+              <div class="pullquote">
+                Post-training is where we translate "be helpful" and "don't cause harm" into something a model can actually optimize for.
+              </div>
+
+              <h2 id="what-is-post-training">What is post-training?</h2>
+              <p>
+                Post-training is the phase after pretraining where we shape model behavior. Unlike pretraining, which learns from raw text, post-training uses feedback, preferences, and explicit objectives to make models more useful, safe, and aligned with human values.
+              </p>
+
+              <p>
+                The lecture walked through the typical pipeline: supervised fine-tuning (SFT) on instruction-following data, reward modeling to capture human preferences, and then reinforcement learning to optimize for those rewards. Each step has trade-offs, and the order matters.
+              </p>
+
+              <ul class="key-terms">
+                <li><span class="term">Supervised Fine-Tuning (SFT)</span> Training on high-quality instruction-response pairs to teach basic instruction following.</li>
+                <li><span class="term">Reward Modeling</span> Learning a function that scores outputs based on human preferences, creating a proxy for "good" behavior.</li>
+                <li><span class="term">RLHF</span> Using reinforcement learning to optimize the model for the learned reward function, shaping behavior through policy gradients.</li>
+                <li><span class="term">Preference Data</span> Human judgments comparing outputs, used to train reward models that capture what humans actually want.</li>
+              </ul>
+
+              <h2 id="reward-modeling">Reward modeling</h2>
+              <p>
+                The reward model is the bridge between human preferences and optimization. We collect preference data—humans ranking or comparing different model outputs—and train a separate model to predict those preferences. This reward model then becomes the signal we optimize for.
+              </p>
+
+              <p>
+                What's tricky is that the reward model is itself a learned proxy. It's trying to capture what humans want, but it's limited by the data we collect, the questions we ask, and the biases in how we frame preferences. A reward model trained on "helpfulness" might optimize for sycophancy. One trained on "safety" might be overly cautious. The reward model encodes our assumptions about what "good" means.
+              </p>
+
+              <div class="callout">
+                <p class="callout-title">Key insight</p>
+                <p>
+                  The reward model is a learned approximation of human preferences. It's not perfect, and its limitations become the model's limitations. This is why evaluation and red-teaming are so critical—they catch cases where the reward model fails.
+                </p>
+              </div>
+
+              <h2 id="rlhf">Reinforcement learning from human feedback</h2>
+              <p>
+                RLHF uses the reward model to guide policy updates. The model generates outputs, the reward model scores them, and we use those scores to update the policy via policy gradient methods (like PPO). Over time, the model learns to generate outputs that score higher on the reward model.
+              </p>
+
+              <p>
+                The challenge is that optimizing for a single reward can lead to reward hacking—the model finds ways to maximize the reward that don't actually align with what we want. Maybe it learns to be overly verbose because longer responses score higher. Maybe it learns to avoid certain topics entirely. The reward model becomes a target to game, not a true measure of quality.
+              </p>
+
+              <p>
+                This is where techniques like KL divergence penalties come in—constraining the policy to stay close to the original model, preventing it from drifting too far into reward-hacking territory. But even with those constraints, there's a tension between optimizing for the reward and maintaining other desirable properties.
+              </p>
+
+              <h2 id="evaluation">Evaluation and monitoring</h2>
+              <p>
+                Evaluation is where we check whether post-training actually worked. We need to measure not just whether the model scores well on the reward model, but whether it's actually helpful, harmless, and honest in practice. This means building evaluation suites that test for specific behaviors, running red-teaming to find failure modes, and monitoring deployed models for drift.
+              </p>
+
+              <p>
+                The lecture emphasized that evaluation is ongoing, not just a one-time check. Models can regress, reward models can drift, and new failure modes emerge. Evaluation frameworks need to catch these issues before they reach users.
+              </p>
+
+              <p>
+                What I found interesting is how evaluation itself involves value judgments. What counts as "helpful"? What counts as "harmful"? These aren't technical questions—they're questions about what we want from these systems, and who gets to decide.
+              </p>
+
+              <h2 id="challenges">The challenges</h2>
+              <p>
+                Post-training is hard because it's trying to solve an underspecified problem. We want models to be helpful, but not sycophantic. Honest, but not unhelpfully blunt. Safe, but not overly cautious. These are competing objectives, and there's no single "right" way to balance them.
+              </p>
+
+              <p>
+                Another challenge is distribution shift. The reward model is trained on a specific set of preferences, but the model will be used in contexts we didn't anticipate. Preferences might differ across cultures, use cases, or over time. A reward model that works well for one group might fail for another.
+              </p>
+
+              <p>
+                There's also the question of who defines the preferences. Whose preferences go into the reward model? Who decides what "good" looks like? These aren't just technical questions—they're questions about power, representation, and accountability.
+              </p>
+
+              <h2 id="what-clicked">What clicked for me</h2>
+              <p>
+                The idea that post-training is fundamentally about preference learning clicked for me this week. We're not just optimizing for a clear objective like accuracy. We're trying to learn what humans want, encode that into a reward function, and then optimize for it. Each step involves choices and trade-offs.
+              </p>
+
+              <p>
+                I also appreciated the emphasis on evaluation as an ongoing process. It's not enough to train a reward model and optimize for it once. We need to continuously check whether the system is actually doing what we want, catch failures, and update our objectives. This is especially important as models get deployed and used in new contexts.
+              </p>
+
+              <p>
+                The technical details of RLHF—policy gradients, KL penalties, reward shaping—are important, but what stood out was how much of the challenge is about translating fuzzy human preferences into something optimizable. The reward model is a learned approximation, and its limitations become the system's limitations.
+              </p>
+
+              <h2 id="questions">Questions I'm wrestling with</h2>
+              <p>
+                How do we handle conflicting preferences? Different users might want different things from the same model. Do we optimize for the average preference? The median? Do we try to personalize? This feels like a design question as much as a technical one.
+              </p>
+
+              <p>
+                How do we know when the reward model is good enough? There's no ground truth for "helpful" or "harmless"—we're always approximating. At what point do we say the approximation is good enough to deploy? And how do we monitor for cases where it fails?
+              </p>
+
+              <p>
+                Who gets to define the preferences? The lecture touched on this, but I'm still thinking about how we ensure that the preferences encoded in reward models represent the people who will be affected by these systems. This seems especially important as these models get used in more diverse contexts.
+              </p>
+
+              <p>
+                Finally, how do we balance competing objectives? Helpfulness vs. safety, honesty vs. harm, capability vs. alignment. These aren't just technical trade-offs—they're value judgments. How do we make those choices explicit and accountable?
+              </p>
+
+              <p>
+                Really excited to dive deeper into the technical details of RLHF and reward modeling in the coming weeks. The theory is one thing, but I want to see how this actually works in practice—what the code looks like, what the data collection process involves, and how teams actually make these trade-offs.
+              </p>
+            </div>
+
+            <footer class="article-footer">
+              <p class="toc-title">Tags</p>
+              <div class="tags">
+                <span class="tag">post-training</span>
+                <span class="tag">RLHF</span>
+                <span class="tag">reward modeling</span>
+                <span class="tag">alignment</span>
+                <span class="tag">evaluation</span>
+                <span class="tag">Module 2</span>
+              </div>
+              <a href="#main" class="back-to-top">↑ Back to top</a>
+            </footer>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span class="footer-mono">CDSS 94 · Spring 2026 · Building Thoughtful AI Systems</span>
+      </div>
+    </footer>
+  </body>
+</html>
