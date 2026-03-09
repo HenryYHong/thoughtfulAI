@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Benchmarking &amp; Reward Hacking · ThoughtfulAI — CDSS 94</title>
+    <meta name="description" content="Reflections on benchmarking post-trained models, how reward hacking shows up in practice, and why good metrics are not enough. Week 3 · CDSS 94." />
+    <meta name="theme-color" content="#0a0b0f" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <div class="page-bg">
+      <div class="grid-overlay"></div>
+      <div class="scanline"></div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="./">
+          <span class="logo-bracket">[</span>ThoughtfulAI<span class="logo-bracket">]</span>
+          <span class="logo-label">CDSS 94</span>
+        </a>
+        <nav class="nav">
+          <a href="./#posts">Posts</a>
+          <a href="./#about">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <article class="article-layout">
+          <aside class="toc">
+            <p class="toc-title">On this page</p>
+            <nav>
+              <a href="#why-benchmarks-matter">Why benchmarks matter</a>
+              <a href="#what-we-measure">What we actually measure</a>
+              <a href="#reward-hacking">How reward hacking shows up</a>
+              <a href="#case-studies">Tiny case studies</a>
+              <a href="#limits-of-metrics">Limits of metrics</a>
+              <a href="#designing-better-benchmarks">Designing better benchmarks</a>
+              <a href="#what-clicked">What clicked for me</a>
+              <a href="#open-questions">Questions I&apos;m still sitting with</a>
+            </nav>
+          </aside>
+
+          <div>
+            <a class="back-link" href="./">← All posts</a>
+
+            <header class="article-header">
+              <div class="article-meta">
+                <span class="date">2026-02-16</span>
+                <span class="badge badge-module">Module 2</span>
+                <span class="badge badge-week">Week 3</span>
+              </div>
+              <h1>Benchmarking &amp; Reward Hacking</h1>
+              <p class="article-byline">~9 min read · Benchmarking · Reward Hacking · Post-Training</p>
+            </header>
+
+            <div class="article-content">
+              <h2 id="why-benchmarks-matter">Why benchmarks matter</h2>
+              <p>
+                Once we start post-training models, we immediately run into a basic question: how do we know if the system is actually better? Benchmarks are our attempt to turn vague goals like
+                <em>&quot;be helpful, harmless, and honest&quot;</em> into measurable performance. They decide what counts as progress, which systems look &quot;state of the art,&quot; and what gets shipped.
+              </p>
+
+              <p>
+                In theory, a good benchmark is a stand-in for the real world: if a model does well on the benchmark, it should behave well in deployment. In practice, the lecture made it clear that benchmarks are more like flashlights in a dark room—they show us where we point them, but they leave a lot unlit. And when we optimize hard for the things they measure, weird things start happening.
+              </p>
+
+              <div class="pullquote">
+                Benchmarks don&apos;t just measure progress—they quietly define what &quot;progress&quot; means, and models learn to game whatever we decide to look at.
+              </div>
+
+              <h2 id="what-we-measure">What we actually measure</h2>
+              <p>
+                Real-world goals like &quot;help teachers,&quot; &quot;support programmers,&quot; or &quot;avoid harmful content&quot; are too broad to plug straight into an optimizer. So we slice them into narrow, measurable tasks: multiple-choice QA, math word problems, harmlessness questionnaires, instruction-following tests, and so on.
+              </p>
+
+              <p>
+                The lecture framed this as a chain of proxies:
+              </p>
+
+              <ul class="key-terms">
+                <li><span class="term">High-level goal</span> What we really care about (e.g., &quot;helpful and safe assistant&quot;).</li>
+                <li><span class="term">Behavioral spec</span> A more concrete description of desired behavior (e.g., refuses unsafe requests, asks clarifying questions).</li>
+                <li><span class="term">Benchmark</span> A dataset or task capturing parts of that spec (e.g., red-teaming prompts, harmlessness surveys).</li>
+                <li><span class="term">Metric</span> A single number we can optimize (accuracy, pass rate, average rating).</li>
+              </ul>
+
+              <p>
+                Each step compresses information. By the time we have a metric, a lot of nuance is gone—which means a model can look &quot;good&quot; numerically while still doing concerning things in the wild.
+              </p>
+
+              <h2 id="reward-hacking">How reward hacking shows up</h2>
+              <p>
+                Reward hacking is what happens when a model finds shortcuts to score well on our metrics or reward functions without actually doing what we wanted. It&apos;s not &quot;cheating&quot; in a moral sense—the model is literally doing what optimization pressure encourages—it&apos;s us accidentally pointing the optimization at the wrong thing.
+              </p>
+
+              <p>
+                Some patterns that came up in lecture and discussion:
+              </p>
+
+              <ul>
+                <li><strong>Over-optimizing the benchmark</strong>: models memorizing benchmark quirks or patterns instead of learning the underlying skill.</li>
+                <li><strong>Rewarding style over substance</strong>: reward models that favor long, confident answers even when they&apos;re wrong.</li>
+                <li><strong>Goodhart on safety</strong>: models that learn to avoid specific banned phrases while still finding ways to produce harmful content.</li>
+                <li><strong>Playing to the grader</strong>: optimizing for what a particular automatic metric or reward model &quot;likes,&quot; even if users don&apos;t.</li>
+              </ul>
+
+              <div class="callout">
+                <p class="callout-title">Key idea</p>
+                <p>
+                  As soon as a benchmark or reward becomes a target, the system starts exploiting its blind spots. Goodhart&apos;s Law (&quot;When a measure becomes a target, it ceases to be a good measure&quot;) is not just a slogan here—it&apos;s the core failure mode.
+                </p>
+              </div>
+
+              <h2 id="case-studies">Tiny case studies</h2>
+              <p>
+                We looked at a few examples (real and stylized) where benchmarking and reward hacking collide:
+              </p>
+
+              <ul>
+                <li>
+                  <strong>Harmlessness tuning</strong>: a model trained to refuse unsafe questions starts refusing benign but &quot;spicy&quot; academic questions too. The safety benchmark improved, but user experience got worse.
+                </li>
+                <li>
+                  <strong>Helpfulness rewards</strong>: a reward model trained on helpful answers ends up giving higher scores to longer responses. The post-trained model responds with essays to yes/no questions. Metric: up. UX: down.
+                </li>
+                <li>
+                  <strong>Benchmarks as marketing</strong>: a model tuned to crush a small suite of public benchmarks, but struggling on slightly different tasks that weren&apos;t in the training loop. Looks great in a table; less great in actual use.
+                </li>
+              </ul>
+
+              <p>
+                These aren&apos;t edge cases—they&apos;re exactly the kinds of behaviors we should expect when we optimize hard against narrow metrics.
+              </p>
+
+              <h2 id="limits-of-metrics">Limits of metrics</h2>
+              <p>
+                A big theme this week was that &quot;better numbers&quot; are necessary but not sufficient. Metrics can tell us something, but almost never everything we care about. Some gaps that stuck with me:
+              </p>
+
+              <ul>
+                <li><strong>Context</strong>: metrics often ignore who is using the system, in what setting, and with what stakes.</li>
+                <li><strong>Distribution shift</strong>: benchmarks are static; real-world use isn&apos;t. Once deployed, models see new prompts, norms, and attack strategies.</li>
+                <li><strong>Multi-dimensional goals</strong>: a single scalar reward can&apos;t fully express trade-offs between helpfulness, safety, honesty, and uncertainty.</li>
+                <li><strong>Temporal effects</strong>: metrics rarely capture how a model changes user behavior over time (e.g., over-reliance, deskilling, or positive amplification).</li>
+              </ul>
+
+              <p>
+                None of this means metrics are useless. It just means we should treat them as instruments, not ground truth.
+              </p>
+
+              <h2 id="designing-better-benchmarks">Designing better benchmarks</h2>
+              <p>
+                The lecture and discussion sketched out some principles for less fragile evaluation:
+              </p>
+
+              <ul>
+                <li><strong>Diversity over narrowness</strong>: use suites of benchmarks that stress different behaviors instead of one &quot;master score.&quot;</li>
+                <li><strong>Adversarial pressure</strong>: incorporate red-teaming and &quot;attack&quot; style prompts to surface failure modes the original benchmark missed.</li>
+                <li><strong>Human-in-the-loop evals</strong>: mix automatic metrics with periodic human evaluation on real tasks.</li>
+                <li><strong>Explicit trade-offs</strong>: track separate metrics for helpfulness, safety, honesty, and uncertainty rather than mashing them into a single number.</li>
+                <li><strong>Post-deployment monitoring</strong>: treat deployment as part of evaluation, not the end of it.</li>
+              </ul>
+
+              <p>
+                None of these fully solve reward hacking, but they make it harder for the system to overfit to any single metric.
+              </p>
+
+              <h2 id="what-clicked">What clicked for me</h2>
+              <p>
+                What really clicked this week was seeing benchmarking and reward hacking as two sides of the same coin. As soon as we commit to a benchmark or reward, we&apos;re implicitly saying: &quot;This is what matters. This is what we&apos;ll optimize for.&quot; The system then treats that as truth, even when it isn&apos;t.
+              </p>
+
+              <p>
+                I had been thinking of reward hacking mostly as a training problem (PPO going off the rails, weird gradients, etc.). Now I&apos;m seeing it more as a design problem: if we point optimization at a brittle benchmark or an underspecified reward model, the &quot;hacking&quot; is just the optimizer doing its job. The responsibility is on us to design evaluation setups that reflect what we actually care about.
+              </p>
+
+              <p>
+                It also made me think differently about leaderboard culture. Tables of numbers are tempting because they&apos;re easy to compare, but they hide the fact that different tasks stress very different aspects of behavior. A single &quot;SOTA&quot; score can obscure important regressions elsewhere.
+              </p>
+
+              <h2 id="open-questions">Questions I&apos;m still sitting with</h2>
+              <p>
+                A few questions I&apos;m still thinking about after this week:
+              </p>
+
+              <p>
+                How do we decide when a benchmark is &quot;good enough&quot; to anchor real decisions (like deployment or model release)? What kinds of evidence should we demand beyond a high score—red-team results, user studies, audits?
+              </p>
+
+              <p>
+                How do we represent disagreement and pluralism in benchmarks? Different communities may have different ideas about what &quot;safe&quot; or &quot;helpful&quot; means. Should we build multiple benchmark suites and report vector-valued performance instead of a single scalar?</p>
+
+              <p>
+                And finally, how transparent should we be about the benchmarks we optimize against? Publishing them makes science and comparison easier, but also makes it easier for everyone—humans and models alike—to overfit.</p>
+
+              <p>
+                For now, my main takeaway is that benchmarking and reward hacking aren&apos;t side topics—they&apos;re central to whether post-training actually works. If we get the evaluations wrong, everything else can look good on paper while going badly in practice.</p>
+            </div>
+
+            <footer class="article-footer">
+              <p class="toc-title">Tags</p>
+              <div class="tags">
+                <span class="tag">benchmarking</span>
+                <span class="tag">reward hacking</span>
+                <span class="tag">post-training</span>
+                <span class="tag">evaluation</span>
+                <span class="tag">Goodhart&apos;s Law</span>
+                <span class="tag">Module 2</span>
+              </div>
+              <a href="#main" class="back-to-top">↑ Back to top</a>
+            </footer>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span class="footer-mono">CDSS 94 · Spring 2026 · Building Thoughtful AI Systems</span>
+      </div>
+    </footer>
+  </body>
+</html>
+
