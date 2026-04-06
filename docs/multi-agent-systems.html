@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Multi-Agent Systems: When One Model Is Not Enough · ThoughtfulAI — CDSS 94</title>
+    <meta
+      name="description"
+      content="Week 9 reflection on multi-agent systems: role specialization, coordination failure modes, and why communication protocols matter as much as model quality."
+    />
+    <meta name="theme-color" content="#0a0b0f" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <div class="page-bg">
+      <div class="grid-overlay"></div>
+      <div class="scanline"></div>
+    </div>
+
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="./">
+          <span class="logo-bracket">[</span>ThoughtfulAI<span class="logo-bracket">]</span>
+          <span class="logo-label">CDSS 94</span>
+        </a>
+        <nav class="nav">
+          <a href="./#posts">Posts</a>
+          <a href="./#about">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <article class="article-layout">
+          <aside class="toc">
+            <p class="toc-title">On this page</p>
+            <nav>
+              <a href="#why-multi-agent">Why multi-agent now</a>
+              <a href="#single-vs-multi">Single-agent vs multi-agent</a>
+              <a href="#patterns">Three useful patterns</a>
+              <a href="#failure-modes">Where things break</a>
+              <a href="#evals">How I would evaluate it</a>
+              <a href="#small-build">A small build idea</a>
+              <a href="#what-clicked">What clicked for me</a>
+              <a href="#open-questions">Open questions</a>
+            </nav>
+          </aside>
+
+          <div>
+            <a class="back-link" href="./">← All posts</a>
+
+            <header class="article-header">
+              <div class="article-meta">
+                <span class="date">2026-04-06</span>
+                <span class="badge badge-module">Module 4 · Systems</span>
+                <span class="badge badge-week">Week 9</span>
+              </div>
+              <h1>Multi-Agent Systems: When One Model Is Not Enough</h1>
+              <p class="article-byline">~8 min read · Multi-Agent Systems · Week 9</p>
+            </header>
+
+            <div class="article-content">
+              <h2 id="why-multi-agent">Why multi-agent now</h2>
+              <p>
+                This week made one thing clear: many useful AI problems are not just "answer one prompt well." They are workflows. Planning, research, verification, and formatting often fight each other when forced into one monolithic prompt.
+              </p>
+
+              <p>
+                Multi-agent systems break that bottleneck by splitting work across specialized roles. Instead of asking one model to do everything at once, we design a coordination loop where different agents contribute focused pieces.
+              </p>
+
+              <div class="pullquote">
+                A multi-agent system is less about "more models" and more about "better division of cognitive labor."
+              </div>
+
+              <h2 id="single-vs-multi">Single-agent vs multi-agent</h2>
+              <p>
+                A strong single agent can still be best for short, low-ambiguity tasks. But as tasks become longer and higher-stakes, role specialization starts to help.
+              </p>
+
+              <ul class="key-terms">
+                <li><span class="term">Single Agent</span> One loop, one policy. Lower overhead, easier debugging, but less explicit decomposition.</li>
+                <li><span class="term">Planner Agent</span> Builds an execution graph: goals, subgoals, dependencies, and stop conditions.</li>
+                <li><span class="term">Worker Agents</span> Execute narrow subtasks like retrieval, coding, or critique.</li>
+                <li><span class="term">Judge Agent</span> Evaluates outputs against rubric constraints before results are accepted.</li>
+              </ul>
+
+              <p>
+                What changed my thinking is that coordination itself is a design variable. You do not just pick better prompts; you pick topology: who talks to whom, when, and with what memory.
+              </p>
+
+              <h2 id="patterns">Three useful patterns</h2>
+              <p>
+                The lecture examples map nicely to three architecture patterns I want to experiment with:
+              </p>
+
+              <ul>
+                <li><strong>Planner-Executor-Critic</strong>: planner decomposes, executor produces draft outputs, critic catches gaps and requests revisions.</li>
+                <li><strong>Debate + Judge</strong>: two agents argue competing solutions, then a separate judge selects or synthesizes a final answer.</li>
+                <li><strong>Router + Specialists</strong>: a front agent classifies intent and forwards to domain specialists (math, policy, coding, retrieval).</li>
+              </ul>
+
+              <div class="callout">
+                <p class="callout-title">Design takeaway</p>
+                <p>
+                  Performance is not only a model capability question; it is also an orchestration question. Better routing and critique can outperform brute-force prompting.
+                </p>
+              </div>
+
+              <h2 id="failure-modes">Where things break</h2>
+              <p>
+                Multi-agent setups introduce new failure modes that do not show up in single-agent pipelines:
+              </p>
+
+              <ul>
+                <li><strong>Coordination drift</strong>: agents optimize local objectives but miss the global task.</li>
+                <li><strong>Error amplification</strong>: an early hallucination gets repeated and "validated" downstream.</li>
+                <li><strong>Protocol mismatch</strong>: agents use inconsistent formats, causing silent handoff failures.</li>
+                <li><strong>Cost creep</strong>: too many loops and retries erase quality-per-dollar gains.</li>
+              </ul>
+
+              <p>
+                This is where systems thinking matters: we need explicit schemas for messages, bounded retries, and checkpoints that can fail safely instead of cascading.
+              </p>
+
+              <h2 id="evals">How I would evaluate it</h2>
+              <p>
+                If I were benchmarking a multi-agent workflow, I would track both task quality and orchestration quality:
+              </p>
+
+              <ul>
+                <li><strong>Outcome quality</strong>: correctness, completeness, and user-rated usefulness.</li>
+                <li><strong>Process quality</strong>: number of loops, tool errors recovered, and agreement between critic and judge.</li>
+                <li><strong>Robustness</strong>: performance under adversarial or ambiguous inputs.</li>
+                <li><strong>Efficiency</strong>: latency and token/tool cost per successful outcome.</li>
+              </ul>
+
+              <p>
+                A system that is slightly less fluent but consistently verifiable and recoverable may be better in production than a flashy system that fails silently.
+              </p>
+
+              <h2 id="small-build">A small build idea</h2>
+              <p>
+                A project idea from this week: build a "syllabus-to-study-plan" assistant using a router plus two specialists.
+              </p>
+
+              <ul>
+                <li><strong>Router</strong>: classify user goal (review notes, timeline planning, project prep).</li>
+                <li><strong>Retrieval specialist</strong>: extract relevant week/module context from course docs.</li>
+                <li><strong>Planning specialist</strong>: generate a concrete schedule with milestones and checks.</li>
+                <li><strong>Critic</strong>: verify deadlines and detect missing prerequisites before returning.</li>
+              </ul>
+
+              <p>
+                It is small enough to prototype, but complex enough to surface the real coordination issues discussed in class.
+              </p>
+
+              <h2 id="what-clicked">What clicked for me</h2>
+              <p>
+                The key shift for me is treating prompts as interfaces, not just instructions. In multi-agent systems, each message is a contract: expected input shape, constraints, and what counts as "done." Once I saw that, the architecture became much more concrete.
+              </p>
+
+              <p>
+                I also realized that evaluation needs to include the collaboration process itself. If one agent keeps rescuing another's mistakes, that can hide brittle behavior until deployment.
+              </p>
+
+              <h2 id="open-questions">Open questions</h2>
+              <p>
+                How should we decide when a task deserves multi-agent orchestration versus a better single-agent prompt? Can we learn dynamic routing policies that trade off quality and cost in real time? And what is the right memory strategy so agents share just enough context without overwhelming each other?
+              </p>
+
+              <p>
+                Week 9 made me optimistic: multi-agent systems feel like a practical path from "smart model demos" to reliable, auditable AI workflows.
+              </p>
+            </div>
+
+            <footer class="article-footer">
+              <p class="toc-title">Tags</p>
+              <div class="tags">
+                <span class="tag">multi-agent systems</span>
+                <span class="tag">orchestration</span>
+                <span class="tag">evaluation</span>
+                <span class="tag">agents</span>
+                <span class="tag">Module 4</span>
+              </div>
+              <a href="#main" class="back-to-top">↑ Back to top</a>
+            </footer>
+          </div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span class="footer-mono">CDSS 94 · Spring 2026 · Building Thoughtful AI Systems</span>
+      </div>
+    </footer>
+  </body>
+</html>
